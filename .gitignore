@@ -3,7 +3,8 @@ node_modules
 
 # output
 out
-dist
+dist/*
+!dist/tui.js
 *.tgz
 
 # code coverage
