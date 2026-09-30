@@ -4,6 +4,21 @@ The plugin adds a T3-style sidebar and composer to OpenCode v2. The host still o
 
 The composer toolbar always shows the current agent, including Build or Plan. Click it to open the native agent picker in new drafts, existing threads or the collapsed composer.
 
+## Screenshots
+
+Captured in Ghostty with OpenCode 2.0.20 running the plugin. Session names and conversation content are fixtures in an isolated database. The composer, slash completion and model picker are the actual OpenCode interface.
+
+![Workspace with the native composer, drafts, pinned threads, snoozed work and settled threads](docs/screenshots/workspace.png)
+
+<details>
+<summary>Native model picker and slash commands</summary>
+
+![OpenCode model picker](docs/screenshots/model-picker.png)
+
+![Native slash completion in a new draft](docs/screenshots/slash-commands.png)
+
+</details>
+
 ## Install
 
 Requires OpenCode 2.0.20 or later, Bun, and a terminal with Kitty graphics support. Graphics have been verified in cmux on macOS. Project initials currently require the macOS Arial Bold font.
