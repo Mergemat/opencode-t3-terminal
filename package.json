@@ -1,0 +1,45 @@
+{
+  "name": "opencode-t3-terminal",
+  "type": "module",
+  "devDependencies": {
+    "@types/bun": "^1.4.2",
+    "@xterm/headless": "^6.0.0",
+    "lucide-static": "^1.49.0",
+    "@opencode/client": "2.0.20",
+    "@opentui/core": "0.5.13",
+    "@opentui/solid": "0.5.13",
+    "solid-js": "1.9.12",
+    "typescript": "^7.0.2"
+  },
+  "peerDependencies": {
+    "@opentui/core": ">=0.5.13 <0.6",
+    "@opentui/solid": ">=0.5.13 <0.6",
+    "solid-js": "1.9.12"
+  },
+  "dependencies": {
+    "@opencode/plugin": "2.0.20",
+    "@resvg/resvg-js": "^2.6.2"
+  },
+  "exports": {
+    "./tui": "./src/index.tsx"
+  },
+  "version": "0.1.0",
+  "description": "T3-style terminal workspace for OpenCode v2",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Mergemat/opencode-t3-terminal.git"
+  },
+  "files": [
+    "src",
+    "assets"
+  ],
+  "engines": {
+    "opencode": ">=2.0.20 <3"
+  },
+  "scripts": {
+    "test": "bun --conditions=browser test tests",
+    "typecheck": "tsc --noEmit",
+    "generate:icons": "bun scripts/generate-icons.ts"
+  },
+  "license": "UNLICENSED"
+}

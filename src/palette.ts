@@ -1,0 +1,17 @@
+export const colors = {
+  background: "#101219",
+  sidebar: "#141720",
+  surface: "#1e2330",
+  composer: "#171b24",
+  composerBorder: "#242936",
+  badge: "#25303b",
+  secondary: "#b4bed2",
+  border: "#303747",
+  snoozedBorder: "#29394b",
+  text: "#e4f0fb",
+  muted: "#8792ae",
+  mint: "#5de4c7",
+  blue: "#add7ff",
+  pink: "#f087bd",
+  yellow: "#fffac2",
+};
