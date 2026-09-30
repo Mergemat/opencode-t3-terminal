@@ -21,25 +21,40 @@
     "@resvg/resvg-js": "^2.6.2"
   },
   "exports": {
-    "./tui": "./src/index.tsx"
+    "./tui": "./tui.js"
   },
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "T3-style terminal workspace for OpenCode v2",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Mergemat/opencode-t3-terminal.git"
   },
   "files": [
-    "src",
+    "tui.js",
+    "dist",
     "assets"
   ],
   "engines": {
     "opencode": ">=2.0.20 <3"
   },
   "scripts": {
-    "test": "bun --conditions=browser test tests",
+    "test": "bun run build && bun --conditions=browser test tests",
     "typecheck": "tsc --noEmit",
-    "generate:icons": "bun scripts/generate-icons.ts"
+    "generate:icons": "bun scripts/generate-icons.ts",
+    "build": "bun scripts/build.ts",
+    "prepare": "bun run build",
+    "prepack": "bun run build"
   },
-  "license": "UNLICENSED"
+  "license": "UNLICENSED",
+  "peerDependenciesMeta": {
+    "@opentui/core": {
+      "optional": true
+    },
+    "@opentui/solid": {
+      "optional": true
+    },
+    "solid-js": {
+      "optional": true
+    }
+  }
 }

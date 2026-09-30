@@ -1,7 +1,10 @@
 import type { BoxRenderable, Renderable, ScrollBoxRenderable, TextRenderable } from "@opentui/core";
-import { Edge, Unit, type Value } from "@opentui/core/yoga";
+import { Yoga } from "@opentui/core";
+import type { Value } from "@opentui/core/yoga";
 import { colors } from "./palette";
 import { fitLabel } from "./single-line";
+
+const { Edge, Unit } = Yoga;
 
 const children = (node: Renderable): Renderable[] => node.getChildren().flatMap(child => [child, ...children(child)]);
 const text = (node: TextRenderable) => node.textNode.toChunks().map(chunk => chunk.text).join("");

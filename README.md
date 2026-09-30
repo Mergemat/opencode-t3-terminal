@@ -20,6 +20,7 @@ For a local checkout:
 git clone https://github.com/Mergemat/opencode-t3-terminal.git
 cd opencode-t3-terminal
 bun install --frozen-lockfile
+bun run build
 ```
 
 Add the absolute checkout path to your OpenCode `cli.json`, normally `~/.config/opencode/cli.json`. For the GitHub installation, use `github:Mergemat/opencode-t3-terminal` instead of the local path:
@@ -27,12 +28,12 @@ Add the absolute checkout path to your OpenCode `cli.json`, normally `~/.config/
 ```json
 {
   "plugins": ["/absolute/path/to/opencode-t3-terminal"],
-  "tabs": { "enabled": false },
+  "tabs": { "mode": "off" },
   "session": { "sidebar": "hide" }
 }
 ```
 
-Restart OpenCode. This CLI-only package exports `./tui` directly from `src/index.tsx`. OpenCode compiles JSX at runtime, so no build step is needed.
+Restart OpenCode. This CLI-only package exposes `tui.js` for local directory discovery and the `./tui` package export. Both load the compiled implementation in `dist/tui.js`, which uses OpenCode's shared OpenTUI and Solid runtime. The GitHub repository includes the compiled entry for direct installation.
 
 See the official [plugin installation docs](https://opencode.ai/v2/docs/plugins), [CLI configuration docs](https://opencode.ai/v2/docs/cli/plugins), and [publishing guide](https://opencode.ai/v2/docs/build/plugins/cli#publish-and-load).
 
@@ -42,9 +43,10 @@ See the official [plugin installation docs](https://opencode.ai/v2/docs/plugins)
 bun install --frozen-lockfile
 bun run typecheck
 bun run test
+bun run build
 ```
 
-The package includes `src/` and `assets/`. Local experiments and QA recordings under `work/` are excluded from version control. Third-party asset licenses are kept under `assets/`.
+The package includes `dist/` and `assets/`. Rebuild after editing source. Local experiments and QA recordings under `work/` are excluded from version control. Third-party asset licenses are kept under `assets/`.
 
 Icons use Lucide assets and provider marks from the T3 source. Regenerate the PNG masks with `bun scripts/generate-icons.ts`. Their licenses are included under `assets/`.
 
