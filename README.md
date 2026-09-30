@@ -6,9 +6,9 @@ The composer toolbar always shows the current agent, including Build or Plan. Cl
 
 ## Screenshots
 
-Captured in Ghostty with OpenCode 2.0.20 running the plugin. Session names and conversation content are fixtures in an isolated database. The composer, slash completion and model picker are the actual OpenCode interface.
+Captured in Ghostty with OpenCode 2.0.20. The main image uses an isolated QA plugin copy with fixture thread states, provider metadata and pull/merge request numbers. It renders the production sidebar components inside the running OpenCode interface. The composer, slash completion and model picker are native OpenCode controls; conversation content is demo data.
 
-![Workspace with the native composer, drafts, pinned threads, snoozed work and settled threads](docs/screenshots/workspace.png)
+![OpenCode with Working, Approval, Input, Done, Failed and Woke threads, request numbers, drafts, Snoozed and Settled sections](docs/screenshots/workspace-states.png)
 
 <details>
 <summary>Native model picker and slash commands</summary>
