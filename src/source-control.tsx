@@ -7,6 +7,8 @@ import { tmpdir } from "node:os";
 import { rm } from "node:fs/promises";
 import { listRequests, parseRemote, parseRequestUrl, readRequest, runCommand, type GitHost, type PullRequest } from "./git-host";
 import { pick } from "./picker";
+import { openUrlCommand } from "./open-url";
+import { requestPresentation } from "./request-badge";
 
 type Repository = { branch: string; host?: GitHost; request?: PullRequest; error?: string };
 export function createSourceControl(context: Plugin.Context, directory: () => string, active: () => string | undefined, newThread: (directory: string) => Promise<boolean>, canLeave: () => boolean) {
@@ -49,7 +51,7 @@ export function createSourceControl(context: Plugin.Context, directory: () => st
   const openUrl = async (url: string) => {
     const request = parseRequestUrl(url);
     if (!request) throw new Error("Invalid pull request URL.");
-    await runCommand(directory(), ["open", url]);
+    await runCommand(directory(), openUrlCommand(url));
   };
   const link = async (sessionID: string, cwd: string, url?: string) => {
     await refresh(cwd);
@@ -141,14 +143,12 @@ export function createSourceControl(context: Plugin.Context, directory: () => st
       if (repo.error) throw new Error(`${repo.error}\nCheck ${repo.host.kind === "github" ? "gh auth login" : "glab auth login"}.`);
       const items = await listRequests(cwd, repo.host);
       const selected = await pick(context, repo.host.kind === "gitlab" ? "Merge requests" : "Pull requests", [
-        ...items.map(item => ({ title: `#${item.number} ${item.title}`, value: item.url, description: `${item.branch} · ${item.draft ? "Draft" : item.state}`, badge: "" })),
-        ...(sessionID ? [{ title: "Link existing request…", value: "link", description: "Associate a request URL with this thread", badge: "" }] : []),
-        ...(!repo.request ? [{ title: "Create request…", value: "create", description: `Push ${repo.branch || "branch"} and create a ${repo.host.kind === "gitlab" ? "merge" : "pull"} request`, badge: "" }] : []),
-        { title: "Native workspaces", value: "workspaces", description: "Open OpenCode's workspace menu", badge: "" },
+        ...items.map(item => ({ title: `#${item.number} ${item.title}`, value: item.url, description: item.branch, icon: requestPresentation(item).icon, iconColor: requestPresentation(item).color })),
+        ...(sessionID ? [{ title: "Link existing request…", value: "link", description: "Paste a URL", icon: "git-pull-request" as const }] : []),
+        ...(!repo.request ? [{ title: "Create request…", value: "create", description: `Push ${repo.branch || "branch"}`, icon: "plus" as const }] : []),
       ]);
       if (selected === "link" && sessionID) await link(sessionID, cwd);
       else if (selected === "create") await createRequest(cwd, repo.host, repo.branch, sessionID);
-      else if (selected === "workspaces") context.keymap.dispatch("session.move");
       else if (selected) { const item = items.find(item => item.url === selected); if (item) await requestMenu(cwd, repo.host, item, sessionID); }
     } catch (error) { report(error); }
   };

@@ -5,6 +5,7 @@ import type { BoxRenderable, CliRenderer, MouseEvent, Renderable } from "@opentu
 import { colors } from "./palette";
 import { SingleLine } from "./single-line";
 import { TerminalIcon, type IconName } from "./terminal-icon";
+import { ProjectMark } from "./project-mark";
 
 export const containsPointer = (node: BoxRenderable | undefined, event: MouseEvent) => !!node
   && event.x >= node.x && event.x < node.x + node.width
@@ -17,12 +18,12 @@ export function ownsPointer(node: BoxRenderable | undefined, event: MouseEvent, 
   return owns(node!);
 }
 
-export function Button(props: { id?: string; label: string; icon?: IconName; iconWidth?: number; iconGap?: number; trailing?: IconName; separator?: string; width?: number | `${number}%`; color?: string; background?: string; compact?: boolean; disabled?: boolean; run(event?: MouseEvent): unknown }) {
+export function Button(props: { id?: string; label: string; icon?: IconName; iconWidth?: number; iconGap?: number; trailing?: IconName; mark?: string; separator?: string; width?: number | `${number}%`; color?: string; background?: string; compact?: boolean; disabled?: boolean; run(event?: MouseEvent): unknown }) {
   const renderer = useRenderer();
   let node: BoxRenderable | undefined;
   let pressed = false;
   const [hovered, setHovered] = createSignal(false);
-  const color = () => props.disabled ? colors.border : hovered() ? colors.text : props.color ?? colors.muted;
+  const color = () => props.disabled ? colors.disabled : hovered() ? colors.text : props.color ?? colors.muted;
   return <box id={props.id} ref={value => { node = value; }} height={1}
     width={props.width ?? Bun.stringWidth(props.label) + (props.icon ? (props.iconWidth ?? 3) + (props.label ? props.iconGap ?? 1 : 0) : props.compact ? 0 : 2) + (props.trailing ? 3 : 0)}
     flexDirection="row" gap={props.icon && props.label ? props.iconGap ?? 1 : props.trailing ? 1 : 0}
@@ -39,7 +40,9 @@ export function Button(props: { id?: string; label: string; icon?: IconName; ico
       pressed = false;
       if (activate) props.run(event);
     }}>
-    {props.icon && <TerminalIcon name={props.icon} color={color()} width={props.label ? props.iconWidth ?? 3 : typeof props.width === "number" ? props.width : 3} />}
+    {props.mark && <box width={3} height={1} flexShrink={0} paddingLeft={1}><ProjectMark name={props.mark} /></box>}
+    {props.icon && <TerminalIcon name={props.icon} color={color()} width={props.label ? props.iconWidth ?? 3 : typeof props.width === "number" ? props.width : 3}
+      align={props.label && props.iconGap === 0 ? "end" : undefined} />}
     {props.label && <SingleLine text={props.label} color={color()} width={props.separator ? Bun.stringWidth(props.label) : undefined} flexGrow={props.separator ? 0 : 1} />}
     {props.separator && <box flexGrow={1} minWidth={1} border={["bottom"]} borderColor={props.separator} height={1} />}
     {props.trailing && <TerminalIcon name={props.trailing} color={color()} width={2} />}

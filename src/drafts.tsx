@@ -76,6 +76,19 @@ export function createDrafts(context: Plugin.Context) {
     await save(draft => { draft.drafts[id] = { id, directory, text: input.plainText, created: empty?.created ?? Date.now() }; });
     setSelected(id);
   };
+  // Discarding the open draft clears its editor and keeps the editor on a fresh draft.
+  const discard = async (id: string) => {
+    const draft = state.drafts[id];
+    if (!draft) return;
+    const open = selected() === id && editor && !editor.isDestroyed;
+    if (open) clearTimeout(timer);
+    const next = open ? crypto.randomUUID() : undefined;
+    await save(value => {
+      delete value.drafts[id];
+      if (next) value.drafts[next] = { id: next, directory: draft.directory, text: "", created: Date.now() };
+    });
+    if (next) { setSelected(next); editor!.setText(""); }
+  };
   onCleanup(() => clearTimeout(timer));
-  return { state, selected, sidebarEntries, select, attach, changed, initialize, flush, canLeave };
+  return { state, selected, sidebarEntries, select, attach, changed, initialize, flush, canLeave, discard };
 }

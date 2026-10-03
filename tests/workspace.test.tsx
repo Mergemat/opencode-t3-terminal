@@ -179,3 +179,31 @@ test("drafts enter the sidebar after navigation and freeze their preview when re
     expect(h.workspace.drafts.sidebarEntries()).toEqual([]);
   } finally { h.dispose(); }
 });
+
+test("Done means an unseen completion; visiting the thread clears it", async () => {
+  const h = harness();
+  try {
+    h.setRoute({ type: "session", sessionID: "a" });
+    await new Promise(resolve => setTimeout(resolve, 0));
+    h.setRoute({ type: "session", sessionID: "b" });
+    await new Promise(resolve => setTimeout(resolve, 0));
+    expect(h.workspace.status("a")).toBe("Idle");
+    h.emit("session.execution.succeeded", "a", Date.now() + 1000);
+    expect(h.workspace.status("a")).toBe("Done");
+    await h.workspace.open("a");
+    expect(h.workspace.status("a")).toBe("Idle");
+    await h.workspace.markUnread("a");
+    expect(h.workspace.status("a")).toBe("Done");
+    expect(h.workspace.status("c")).toBe("Idle");
+  } finally { h.dispose(); }
+});
+test("unpinning offers Undo", async () => {
+  const h = harness();
+  try {
+    await h.workspace.togglePin("a");
+    await h.workspace.togglePin("a");
+    expect(h.workspace.undo.notice()?.label).toBe("Unpinned 1 thread");
+    await h.workspace.undo.undo();
+    expect(h.workspace.threads.state.pinned.a).toBe(true);
+  } finally { h.dispose(); }
+});
