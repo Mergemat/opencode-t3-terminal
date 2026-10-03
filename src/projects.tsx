@@ -5,6 +5,7 @@ import { homedir } from "node:os";
 import { mkdir, readdir, stat } from "node:fs/promises";
 import { pick } from "./picker";
 import { runCommand } from "./git-host";
+import { tildePath } from "./project-picker";
 
 export function createProjectActions(context: Plugin.Context, current: () => string, register: (directory: string) => Promise<void>, open: (directory: string) => Promise<void>) {
   const resolve = (input: string) => path.resolve(current(), input.trim().replace(/^~(?=\/|$)/, homedir()));
@@ -13,10 +14,10 @@ export function createProjectActions(context: Plugin.Context, current: () => str
     while (true) {
       const entries = (await readdir(directory, { withFileTypes: true })).filter(entry => entry.isDirectory() && !entry.name.startsWith(".")).sort((a, b) => a.name.localeCompare(b.name));
       const chosen = await pick(context, "Add local project", [
-        { title: `Use ${path.basename(directory) || directory}`, value: "use", description: directory, badge: "" },
-        { title: "Enter a path…", value: "path", description: "Choose an existing folder or create a new one", badge: "" },
-        ...(directory !== path.dirname(directory) ? [{ title: "Parent directory", value: path.dirname(directory), description: path.dirname(directory), badge: "" }] : []),
-        ...entries.map(entry => ({ title: entry.name, value: path.join(directory, entry.name), description: path.join(directory, entry.name), badge: "" })),
+        { title: `Use ${path.basename(directory) || directory}`, value: "use", description: tildePath(directory), icon: "check" as const },
+        { title: "Enter a path…", value: "path", description: "Existing or new folder", icon: "square-pen" as const },
+        ...(directory !== path.dirname(directory) ? [{ title: "..", value: path.dirname(directory), description: tildePath(path.dirname(directory)), icon: "arrow-left" as const }] : []),
+        ...entries.map(entry => ({ title: entry.name, value: path.join(directory, entry.name), icon: "folder" as const })),
       ]);
       if (!chosen) return;
       if (chosen === "use") return directory;
@@ -58,7 +59,7 @@ export function createProjectActions(context: Plugin.Context, current: () => str
             const items = source === "github"
               ? JSON.parse(await runCommand(current(), ["gh", "repo", "list", "--limit", "100", "--json", "nameWithOwner,url"])) as { nameWithOwner: string; url: string }[]
               : (JSON.parse(await runCommand(current(), ["glab", "api", "projects?membership=true&per_page=100"])) as { path_with_namespace: string; web_url: string }[]).map(item => ({ nameWithOwner: item.path_with_namespace, url: item.web_url }));
-            repository = await pick(context, source === "github" ? "GitHub repositories" : "GitLab repositories", items.map(item => ({ title: item.nameWithOwner, value: item.nameWithOwner, description: item.url, badge: "" })));
+            repository = await pick(context, source === "github" ? "GitHub repositories" : "GitLab repositories", items.map(item => ({ title: item.nameWithOwner, value: item.nameWithOwner, icon: "git-branch" as const })));
             if (!repository) return;
             url = items.find(item => item.nameWithOwner === repository)!.url;
           } catch (error) { throw new Error(`${error instanceof Error ? error.message : String(error)}\nRun ${source === "github" ? "gh auth login" : "glab auth login"} to configure access.`); }

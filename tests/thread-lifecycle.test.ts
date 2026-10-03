@@ -17,12 +17,12 @@ test("parking advances relative to the selected card and wraps", () => {
   expect(nextAfterPark(cards, "c")).toBe("a");
   expect(nextAfterPark([cards[0]!], "a")).toBeUndefined();
 });
-test("Next Monday uses the calendar and doesn't duplicate tomorrow on Sunday", () => {
+test("Next week uses the calendar and doesn't duplicate tomorrow on Sunday", () => {
   const friday = snoozePresets(new Date(2026, 9, 2, 12));
-  const monday = new Date(friday.find(item => item.title === "Next Monday")!.time);
+  const monday = new Date(friday.find(item => item.title === "Next week")!.time);
   expect([monday.getDay(), monday.getDate(), monday.getHours()]).toEqual([1, 5, 9]);
   const sunday = snoozePresets(new Date(2026, 9, 4, 12));
-  expect(sunday.some(item => item.title === "Next Monday")).toBe(false);
+  expect(sunday.some(item => item.title === "Next week")).toBe(false);
   expect(new Set(sunday.map(item => item.time)).size).toBe(sunday.length);
 });
 test("custom wake input rejects past, zero and invalid values", () => {

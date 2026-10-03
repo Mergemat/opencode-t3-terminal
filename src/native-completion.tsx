@@ -7,7 +7,10 @@ import { fitLabel } from "./single-line";
 const { Edge, Unit } = Yoga;
 
 const children = (node: Renderable): Renderable[] => node.getChildren().flatMap(child => [child, ...children(child)]);
-const text = (node: TextRenderable) => node.textNode.toChunks().map(chunk => chunk.text).join("");
+const text = (node: TextRenderable) => node.textNode?.toChunks().map(chunk => chunk.text).join("") ?? "";
+const textsOf = (row: Renderable) => children(row).filter(node => node.id.startsWith("text-")) as TextRenderable[];
+const emptyText = { textNode: undefined } as unknown as TextRenderable;
+const styleable = (row: Renderable) => { const texts = textsOf(row); return texts.length >= 2 && text(texts[0]!).trimStart().startsWith("/"); };
 const displayedText = (node: TextRenderable) => node.chunks.map(chunk => chunk.text).join("");
 const dimension = (value: Value): number | "auto" | `${number}%` => value.unit === Unit.Point ? value.value
   : value.unit === Unit.Percent ? `${value.value}%` : "auto";
@@ -24,10 +27,7 @@ const saveBox = (box: BoxRenderable) => {
 // Its completion popup has no plugin slot; change only that popup's presentation.
 export function mountCompletionMenu(prompt: Renderable, composer: Renderable) {
   const list = children(prompt).find(node => node.id.startsWith("scrollbox-")
-    && node.getChildren().some(row => {
-      const label = row.getChildren()[0] as TextRenderable | undefined;
-      return label?.id.startsWith("text-") && text(label).startsWith("/");
-    })) as ScrollBoxRenderable | undefined;
+    && node.getChildren().some(row => text(textsOf(row)[0] ?? emptyText).trimStart().startsWith("/"))) as ScrollBoxRenderable | undefined;
   const popup = list?.parent as BoxRenderable | undefined;
   if (!list || !popup) return;
   const before = popup.onLifecyclePass;
@@ -45,7 +45,10 @@ export function mountCompletionMenu(prompt: Renderable, composer: Renderable) {
     for (const row of rows.keys()) if (row.isDestroyed) rows.delete(row);
     const left = composer.x + 2 - (popup.parent?.x ?? 0);
     const width = Math.max(1, composer.width - 4);
-    const height = Math.max(2, Math.min(16, list.getChildren().filter(row => row.visible).length * 2 + 2, composer.y - 4));
+    const visibleRows = list.getChildren().filter(row => row.visible);
+    // Styled rows are two lines; anything the host adds keeps its own height.
+    const rowHeight = (row: Renderable) => rows.has(row) || styleable(row) ? 2 : Math.max(1, row.height);
+    const height = Math.max(2, Math.min(16, visibleRows.reduce((sum, row) => sum + rowHeight(row), 0) + 2, composer.y - 4));
     const top = composer.y - height - (popup.parent?.y ?? 0);
     if (popup.left !== left) popup.left = left;
     // Width/height getters report the previous frame, while the host may have
@@ -59,15 +62,18 @@ export function mountCompletionMenu(prompt: Renderable, composer: Renderable) {
     const active = options.find(row => (row as BoxRenderable).backgroundColor?.a);
     if (active && active !== selected) {
       selected = active;
-      const itemTop = options.indexOf(active) * 2;
+      const itemTop = options.slice(0, options.indexOf(active)).filter(row => row.visible).reduce((sum, row) => sum + rowHeight(row), 0);
+      const itemHeight = rowHeight(active);
       if (itemTop < list.scrollTop) list.scrollTop = itemTop;
-      else if (itemTop + 2 > list.scrollTop + list.viewport.height) list.scrollTop = itemTop + 2 - list.viewport.height;
+      else if (itemTop + itemHeight > list.scrollTop + list.viewport.height) list.scrollTop = itemTop + itemHeight - list.viewport.height;
     }
     for (const node of list.getChildren()) {
       if (rows.has(node)) continue;
       const row = node as BoxRenderable;
-      const labels = row.getChildren() as TextRenderable[];
-      if (labels.length !== 2 || !labels[0]?.id.startsWith("text-")) continue;
+      // Name first, description last, whatever the host nests between them.
+      if (!styleable(row)) continue;
+      const texts = textsOf(row);
+      const labels = [texts[0]!, texts.at(-1)!];
       const savedRow = saveBox(row);
       const savedLabels = labels.map(label => ({ content: text(label), fg: label.fg, wrapMode: label.wrapMode,
         width: dimension(label.getLayoutNode().getWidth()) }));

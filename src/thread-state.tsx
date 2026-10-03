@@ -1,8 +1,7 @@
 /** @jsxImportSource @opentui/solid */
 import type { Plugin } from "@opencode/plugin/tui";
-import { pick } from "./picker";
-import { icons } from "./icons";
-import { parseWakeTime, snoozePresets } from "./thread-lifecycle";
+import { pick, type PickerOption } from "./picker";
+import { parseWakeTime, snoozePresets, wakeDescription } from "./thread-lifecycle";
 
 export function createThreadState(context: Plugin.Context) {
   const [state, save] = context.storage.store("thread-state", {
@@ -11,12 +10,16 @@ export function createThreadState(context: Plugin.Context) {
   const [lifecycle, updateLifecycle] = context.storage.store("thread-lifecycle", {
     initial: { snoozedAt: {} as Record<string, number>, anchors: {} as Record<string, number> },
   });
+  // T3 Code reads "Done" as a completion you have not seen yet, and labels a
+  // card with the branch the thread worked on rather than the live checkout.
+  const [seen, updateSeen] = context.storage.store("thread-seen", {
+    initial: { visited: {} as Record<string, number>, unread: {} as Record<string, boolean>, branches: {} as Record<string, string> },
+  });
   const chooseSnooze = async () => {
     const options = snoozePresets(new Date());
-    const choice = await pick(context, "Snooze thread", options.map(option => ({
-      title: option.title, value: String(option.time), badge: icons.snooze,
-      description: new Date(option.time).toLocaleString(undefined, { weekday: "short", hour: "2-digit", minute: "2-digit" }),
-    })).concat([{ title: "Custom time", value: "custom", badge: icons.snooze, description: "Duration (30m, 2h, 3d) or date and time" }]));
+    const choice = await pick(context, "Snooze thread", options.map((option): PickerOption => ({
+      title: option.title, value: String(option.time), icon: "clock", description: wakeDescription(option.time, new Date()),
+    })).concat([{ title: "Custom…", value: "custom", icon: "alarm-clock", description: "30m, 2h, 3d or a date" }]));
     if (!choice) return;
     if (choice !== "custom") return Number(choice);
     const input = await context.ui.dialog.prompt({ title: "Wake thread at…", placeholder: "30m, 2h, or 2026-10-01 09:00" });
@@ -60,5 +63,13 @@ export function createThreadState(context: Plugin.Context) {
     });
   };
   const unpin = (id: string) => save(draft => { delete draft.pinned[id]; });
-  return { state, lifecycle, chooseSnooze, snooze, clear, acknowledge, wake, raiseAttention, reenter, togglePin, unpin, snapshot, restore };
+  const visit = (ids: string[], at = Date.now()) => {
+    const due = ids.filter(id => id && ((seen.visited[id] ?? 0) < at || seen.unread[id]));
+    if (due.length) return updateSeen(draft => { for (const id of due) { draft.visited[id] = Math.max(draft.visited[id] ?? 0, at); delete draft.unread[id]; } });
+  };
+  const markUnread = (id: string) => updateSeen(draft => { draft.unread[id] = true; });
+  const recordBranch = (id: string, branch: string | undefined) => {
+    if (branch && seen.branches[id] !== branch) return updateSeen(draft => { draft.branches[id] = branch; });
+  };
+  return { state, lifecycle, seen, chooseSnooze, snooze, clear, acknowledge, wake, raiseAttention, reenter, togglePin, unpin, snapshot, restore, visit, markUnread, recordBranch };
 }

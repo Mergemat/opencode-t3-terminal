@@ -17,7 +17,7 @@ Captured in Ghostty. Thread states, request numbers and conversation content are
 
 ## Install
 
-Requires OpenCode 2.0.20+, Bun and a terminal with Kitty graphics support. Project badges currently require macOS's Arial Bold font.
+Requires OpenCode 2.0.20+, Bun and a terminal with Kitty graphics support. Colors follow your OpenCode theme.
 
 ```sh
 opencode plugin add github:Mergemat/opencode-t3-terminal
@@ -42,11 +42,13 @@ For a local checkout, run `bun install --frozen-lockfile` and `bun run build`, t
 | `Ctrl+K` | Find thread |
 | `Ctrl+N` | New thread, choose project |
 | `Ctrl+Shift+N` | New thread in current project |
-| `Ctrl+Shift+S` | Settle or restore thread |
+| `Ctrl+Shift+S` | Settle or un-settle thread |
 | `Ctrl+Shift+Z` | Undo thread action |
 | `/prs` | Browse, link or create PRs and MRs |
 
-Snooze hides a thread while its agent keeps running. It returns when the timer expires, work finishes or it needs a response. Settle moves finished work out of the active list. Both actions offer five seconds to undo.
+Snooze hides a thread while its agent keeps running. It returns when the timer expires, work finishes or it needs a response. Settle moves finished work out of the active list. Settling, snoozing and unpinning offer five seconds to undo. Right-click a thread for more actions, including Mark unread and Delete.
+
+Cards show **Done** only for work you have not seen yet; once you open the thread, it shows its age. Each card keeps the branch its thread worked on.
 
 Text drafts persist across projects. Drafts with attachments stay in the native editor until you send or remove the attachments.
 
@@ -59,6 +61,6 @@ bun run test
 bun run build
 ```
 
-Rebuild after source changes. The repository includes the compiled plugin for GitHub installation. Asset licenses are in `assets/`; regenerate icons with `bun run generate:icons`.
+Rebuild after source changes. The repository includes the compiled plugin for GitHub installation. To preview the sidebar and picker with fixture threads, run `bun --preload @opentui/solid/preload --conditions=browser scripts/preview.tsx /tmp/t3-preview`. Asset licenses are in `assets/`; regenerate icons with `bun run generate:icons`.
 
 [OpenCode plugin docs](https://opencode.ai/v2/docs/plugins)

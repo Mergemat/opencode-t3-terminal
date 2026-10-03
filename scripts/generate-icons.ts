@@ -1,6 +1,8 @@
 import { Resvg } from '@resvg/resvg-js';
 import { mkdir } from 'node:fs/promises';
-const names=['arrow-left','git-pull-request','search','folder','folder-plus','square-pen','settings','chart-no-axes-column','refresh-cw','clock','check','undo-2','arrow-up','square','paperclip','chevron-down','chevron-up','pin','git-branch','lock-keyhole-open','lock-keyhole','panel-left-close','circle-dashed','circle-alert'];
+const names=['arrow-left','git-pull-request','search','folder','folder-plus','square-pen','settings','chart-no-axes-column','refresh-cw','clock','check','undo-2','arrow-up','square','paperclip','chevron-down','chevron-up','pin','git-branch','lock-keyhole-open','lock-keyhole','panel-left-close','circle-dashed','circle-alert',
+ 'circle-check','shield-question','message-circle-question','alarm-clock','alarm-clock-off','x','plus',
+ 'git-pull-request-draft','git-pull-request-closed','git-merge','panel-left-open'];
 await mkdir(new URL('../assets/icons/',import.meta.url),{recursive:true});
 for(const name of names){
  const svg=await Bun.file(new URL(`../node_modules/lucide-static/icons/${name}.svg`,import.meta.url)).text();
