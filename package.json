@@ -38,12 +38,10 @@
     "opencode": ">=2.0.20 <3"
   },
   "scripts": {
-    "test": "bun run build && bun --conditions=browser test tests",
+    "test": "bun run bundle && bun --conditions=browser test tests",
     "typecheck": "tsc --noEmit",
     "generate:icons": "bun scripts/generate-icons.ts",
-    "build": "bun scripts/build.ts",
-    "prepare": "bun run build",
-    "prepack": "bun run build"
+    "bundle": "bun scripts/build.ts"
   },
   "license": "UNLICENSED",
   "peerDependenciesMeta": {
