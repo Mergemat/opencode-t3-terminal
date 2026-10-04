@@ -32,7 +32,7 @@ Disable OpenCode's tabs and sidebar in `~/.config/opencode/cli.json`, then resta
 }
 ```
 
-For a local checkout, run `bun install --frozen-lockfile` and `bun run build`, then add its absolute path to the `plugins` array in `cli.json`.
+For a local checkout, run `bun install --frozen-lockfile` and `bun run bundle`, then add its absolute path to the `plugins` array in `cli.json`.
 
 ## Use
 
@@ -58,7 +58,7 @@ Text drafts persist across projects. Drafts with attachments stay in the native 
 bun install --frozen-lockfile
 bun run typecheck
 bun run test
-bun run build
+bun run bundle
 ```
 
 Rebuild after source changes. The repository includes the compiled plugin for GitHub installation. To preview the sidebar and picker with fixture threads, run `bun --preload @opentui/solid/preload --conditions=browser scripts/preview.tsx /tmp/t3-preview`. Asset licenses are in `assets/`; regenerate icons with `bun run generate:icons`.
